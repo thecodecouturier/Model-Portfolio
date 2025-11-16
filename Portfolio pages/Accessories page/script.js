@@ -1,3 +1,32 @@
+function loadNavbar() {
+  fetch('../../components/navbar.html') // عدل المسار حسب مكان navbar.html
+    .then(res => res.text())
+    .then(data => {
+      const container = document.getElementById('navbar');
+      container.innerHTML = data;
+
+      // بعد ما النافبار يدخل، اربط ملفات CSS و JS الخاصة به
+      const navbarCss = document.createElement('link');
+      navbarCss.rel = 'stylesheet';
+      navbarCss.href = '../../components/navbar.css'; // عدل المسار حسب مكان ملف CSS
+      document.head.appendChild(navbarCss);
+
+      const navbarScript = document.createElement('script');
+      navbarScript.src = '../../components/navbar.js'; // عدل المسار حسب مكان ملف JS
+      navbarScript.onload = function() {
+        // إذا كان هناك دالة تهيئة في navbar.js مثل initNavbar()
+        if (typeof initNavbar === 'function') {
+          initNavbar();
+        }
+        // استدعاء دالة ضبط الروابط بعد تهيئة النافبار
+        fixNavbarLinks();
+        activateCurrentNavbarLink();
+      };
+      document.body.appendChild(navbarScript);
+    });
+}
+document.addEventListener('DOMContentLoaded', loadNavbar);
+
 document.addEventListener("DOMContentLoaded", () => {
   const galleryItems = document.querySelectorAll(".gallery-img-wrapper");
   const lightbox = document.getElementById("lightbox");
@@ -123,212 +152,4 @@ const svgReplay = `
   if (yearSpan) {
     yearSpan.textContent = new Date().getFullYear();
   }
-});
-////////// navbar
-function deleteTranslateCookie() {
-  document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-  document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + location.hostname + ";";
-}
-
-function googleTranslateElementInit() {
-  new google.translate.TranslateElement({
-    pageLanguage: 'en',
-    includedLanguages: 'en,fr,it,es,de,pt,ru,ja,ko,ar',
-    layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL,
-    autoDisplay: false
-  }, 'google_translate_element');
-}
-
-let isTranslating = false;
-
-const languageMap = {
-  en: { code: "EN", flag: "https://flagcdn.com/w20/gb.png" },
-  fr: { code: "FR", flag: "https://flagcdn.com/w20/fr.png" },
-  it: { code: "IT", flag: "https://flagcdn.com/w20/it.png" },
-  es: { code: "ES", flag: "https://flagcdn.com/w20/es.png" },
-  de: { code: "DE", flag: "https://flagcdn.com/w20/de.png" },
-  pt: { code: "PT", flag: "https://flagcdn.com/w20/pt.png" },
-  ru: { code: "RU", flag: "https://flagcdn.com/w20/ru.png" },
-  ja: { code: "JA", flag: "https://flagcdn.com/w20/jp.png" },
-  ko: { code: "KO", flag: "https://flagcdn.com/w20/kr.png" },
-  ar: { code: "AR", flag: "https://flagcdn.com/w20/sa.png" }
-};
-
-function updateLanguageButton(lang) {
-  const codeEl = document.getElementById("languageCode");
-  const flagEl = document.getElementById("languageFlag");
-
-  if (codeEl && flagEl && languageMap[lang]) {
-    codeEl.textContent = languageMap[lang].code;
-    flagEl.src = `${languageMap[lang].flag}?t=${Date.now()}`;
-    flagEl.alt = languageMap[lang].code;
-  }
-}
-
-function changeLanguage(lang, save = true) {
-  if (isTranslating) return;
-  isTranslating = true;
-
-  const select = document.querySelector("select.goog-te-combo");
-  if (select) {
-    document.querySelectorAll("#languageDropdown a").forEach(link => {
-      link.classList.remove("active-language");
-    });
-
-    const currentLink = document.querySelector(`#languageDropdown a[data-lang="${lang}"]`);
-    if (currentLink) currentLink.classList.add("active-language");
-
-    select.value = lang;
-    select.dispatchEvent(new Event("change"));
-
-    if (save) localStorage.setItem("preferredLang", lang);
-    updateLanguageButton(lang);
-  }
-
-  setTimeout(() => {
-    isTranslating = false;
-  }, 1500);
-}
-
-function waitForGoogleTranslateReady(callback) {
-  const interval = setInterval(() => {
-    const select = document.querySelector("select.goog-te-combo");
-    if (select) {
-      clearInterval(interval);
-      callback();
-    }
-  }, 100);
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  deleteTranslateCookie(); // ← حذف الكوكي عند التحميل
-
-  waitForGoogleTranslateReady(() => {
-    changeLanguage("en", false); // ← فرض العودة للإنجليزية
-  });
-
-  const langButton = document.getElementById("languageBtn");
-  const langDropdown = document.getElementById("languageDropdown");
-
-  if (langButton && langDropdown) {
-    langButton.addEventListener("click", (e) => {
-  e.stopPropagation();
-  langDropdown.classList.toggle("show");
-});
-
-document.addEventListener("click", () => {
-  langDropdown.classList.remove("show");
-});
-
-// إغلاق عند التمرير لأسفل
-let lastLangScrollPos = 0;
-window.addEventListener("scroll", () => {
-  const currentScroll = window.scrollY;
-  if (langDropdown.classList.contains("show") && currentScroll > lastLangScrollPos) {
-    langDropdown.classList.remove("show");
-  }
-  lastLangScrollPos = currentScroll;
-});
-
-    document.querySelectorAll("#languageDropdown a").forEach(link => {
-      link.addEventListener("click", (e) => {
-        e.preventDefault();
-        const lang = link.getAttribute("data-lang");
-        changeLanguage(lang);
-      });
-    });
-  }
-
-  const portfolioLink = document.getElementById("portfolioLink");
-const portfolioDropdown = document.querySelector(".portfolio-dropdown");
-
-// إظهار / إخفاء القائمة عند الضغط
-portfolioLink.addEventListener("click", (e) => {
-  e.preventDefault();
-  const isVisible = portfolioDropdown.style.opacity === "1";
-  if (isVisible) {
-    hideDropdown();
-  } else {
-    showDropdown();
-  }
-});
-
-// إغلاق القائمة عند التمرير لأسفل
-let lastScrollPos = 0;
-window.addEventListener("scroll", () => {
-  const currentScroll = window.scrollY;
-  if (portfolioDropdown.style.opacity === "1" && currentScroll > lastScrollPos) {
-    hideDropdown();
-  }
-  lastScrollPos = currentScroll;
-});
-
-// إغلاق القائمة عند الضغط على أي عنصر بداخلها
-document.querySelectorAll(".portfolio-dropdown .dropdown-link").forEach(link => {
-  link.addEventListener("click", () => {
-    hideDropdown();
-  });
-});
-
-// إغلاق عند الضغط خارج القائمة
-document.addEventListener("click", (e) => {
-  if (!portfolioDropdown.contains(e.target) && !portfolioLink.contains(e.target)) {
-    hideDropdown();
-  }
-});
-
-// دوال الإظهار والإخفاء
-function showDropdown() {
-  portfolioDropdown.style.opacity = "1";
-  portfolioDropdown.style.pointerEvents = "auto";
-  portfolioDropdown.style.transform = "translateX(-50%) translateY(0)";
-  portfolioLink.classList.add("active"); // ✅ نضيف كلاس active
-}
-
-function hideDropdown() {
-  portfolioDropdown.style.opacity = "0";
-  portfolioDropdown.style.pointerEvents = "none";
-  portfolioDropdown.style.transform = "translateX(-50%) translateY(-10px)";
-  portfolioLink.classList.remove("active"); // ✅ نشيله لما القائمة تتقفل
-}
-// بعد إدراج الـ navbar
-const currentPath = window.location.pathname;
-
-document.querySelectorAll('.nav-link, .dropdown-link').forEach(link => {
-  try {
-    const fullUrl = new URL(link.href);
-    if (fullUrl.pathname === currentPath) {
-      link.classList.add('active');
-    }
-  } catch (e) {
-    // في حالة الروابط الداخلية زي #about أو #runway مثلاً
-    if (link.getAttribute('href') === window.location.hash) {
-      link.classList.add('active');
-    }
-  }
-});
-
-
-});
-
-// ✅ القائمة الجانبية
-const hamburgerBtn = document.getElementById("hamburgerBtn");
-const sideMenu = document.getElementById("sideMenu");
-const closeSideMenu = document.getElementById("closeSideMenu");
-
-hamburgerBtn.addEventListener("click", () => {
-  sideMenu.classList.add("show");
-});
-
-closeSideMenu.addEventListener("click", () => {
-  sideMenu.classList.remove("show");
-});
-
-// ✅ التحكم في إظهار/إخفاء قائمة Portfolio داخل القائمة الجانبية
-const sidePortfolioToggle = document.getElementById("sidePortfolioToggle");
-const sidePortfolioDropdown = document.getElementById("sidePortfolioDropdown");
-
-sidePortfolioToggle.addEventListener("click", () => {
-  sidePortfolioDropdown.classList.toggle("show");
-  sidePortfolioToggle.classList.toggle("active"); // ✅ يقلب السهم
 });

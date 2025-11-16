@@ -1,191 +1,320 @@
-const sections = document.querySelectorAll('.section');
-let lastScroll = window.scrollY;
-
-// إلغاء updateAnimations بالكامل
-
-function applyInitialAnimations() {
-    sections.forEach((section, index) => {
-        const image = section.querySelector('.image img');
-        const paragraphs = section.querySelectorAll('.paragraph');
-        const direction = section.dataset.direction;
-
-        image.style.opacity = '0';
-        image.style.transform = 'translateY(100px) scale(0.95)';
-        image.style.transition = 'none';
-
-        paragraphs.forEach(p => {
-            p.style.opacity = '0';
-            p.style.transform = direction === 'left' ? 'translateX(-80px) scale(0.9)' : 'translateX(80px) scale(0.9)';
-            p.style.transition = 'none';
-        });
-
-        setTimeout(() => {
-            image.style.transition = 'opacity 1.2s ease, transform 1.2s cubic-bezier(0.22, 0.61, 0.36, 1)';
-            image.style.opacity = '1';
-            image.style.transform = 'translateY(0) scale(1)';
-
-            paragraphs.forEach((p, i) => {
-                const delay = 300 + i * 200;
-                setTimeout(() => {
-                    p.style.transition = 'opacity 1s ease, transform 1s cubic-bezier(0.22, 0.61, 0.36, 1)';
-                    p.style.opacity = '1';
-                    p.style.transform = 'translateX(0) scale(1)';
-                }, delay);
-            });
-        }, index * 350);
+// ربط العداد الجانبي بالسكاشن
+document.addEventListener('DOMContentLoaded', function() {
+  const sections = document.querySelectorAll('.section');
+  const counterItems = document.querySelectorAll('.side-counter .counter-item');
+  function updateCounter() {
+    let activeIndex = 0;
+    sections.forEach((section, idx) => {
+      if (section.classList.contains('active')) {
+        activeIndex = idx;
+      }
     });
-}
-
-function handleScroll() {
-    const currentScroll = window.scrollY;
-    const viewportHeight = window.innerHeight;
-
-    sections.forEach((section) => {
-        const rect = section.getBoundingClientRect();
-        const top = rect.top;
-        const bottom = rect.bottom;
-        const image = section.querySelector('.image img');
-        const paragraphs = section.querySelectorAll('.paragraph');
-        const sectionDirection = section.dataset.direction;
-
-        // ✅ الصورة تشتغل بمجرد ما جزء منها يدخل الفيو بورت
-        if (top < viewportHeight && bottom > 0) {
-            image.style.opacity = '1';
-            image.style.transform = 'translateY(0) scale(1)';
-            image.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        } else {
-            image.style.opacity = '0';
-            image.style.transform = 'translateY(120px) scale(0.95)';
-            image.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-        }
-
-        // ✅ شرط أدق لظهور العبارات لما يكون السكشن شبه كامل داخل الفيو بورت
-        const sectionFullyVisible = top >= 0 && bottom <= viewportHeight;
-        const sectionMostlyVisible = top < 0 && bottom > viewportHeight * 0.8;
-
-        if (sectionFullyVisible || sectionMostlyVisible) {
-            paragraphs.forEach((p, i) => {
-                p.style.opacity = '1';
-                p.style.transform = 'translateX(0) scale(1)';
-                p.style.transition = `opacity 0.5s ease ${i * 0.1}s, transform 0.5s ease ${i * 0.1}s`;
-            });
-        } else {
-            paragraphs.forEach((p) => {
-                let isLeft = p.classList.contains('paragraph-left');
-                let isRight = p.classList.contains('paragraph-right');
-                let x = sectionDirection === 'left' ? -100 : 100;
-                if (isLeft) x = -100;
-                if (isRight) x = 100;
-
-                p.style.opacity = '0';
-                p.style.transform = `translateX(${x}px) scale(0.9)`;
-                p.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-            });
-        }
+    counterItems.forEach((item, idx) => {
+      if (idx === activeIndex) {
+        item.classList.add('active');
+      } else {
+        item.classList.remove('active');
+      }
     });
-
-    lastScroll = currentScroll;
-}
-
-// Scroll Optimized
-let ticking = false;
-window.addEventListener('scroll', () => {
-  if (!ticking) {
-    window.requestAnimationFrame(() => {
-      handleScroll();
-      ticking = false;
-    });
-    ticking = true;
   }
+  // إذا كان لديك كود يغير السكشن النشط، استدعي updateCounter() بعد تغييره
+  // مثال: عند تغيير السكشن عبر زر أو سكرول
+  setInterval(updateCounter, 300); // تحديث تلقائي كل 0.3 ثانية
 });
+const sections = document.querySelectorAll(".section");
+let currentIndex = 0;
+let isAnimating = false;
 
-// Load
-window.addEventListener('DOMContentLoaded', () => {
-    sections.forEach(section => {
-        const image = section.querySelector('.image img');
-        const paragraphs = section.querySelectorAll('.paragraph');
-        const direction = section.dataset.direction;
+// إظهار أول سكشن بشكل مخفي ثم تطبيق الأنميشن بعد تحميل الصفحة
+const firstSection = sections[0];
+const firstImage = firstSection.querySelector('.image');
+const firstText = firstSection.querySelector('.text');
 
-        image.style.opacity = '0';
-        image.style.transform = 'translateY(120px) scale(0.95)';
-        image.style.willChange = 'transform, opacity';
+firstSection.style.opacity = "1";
+firstSection.classList.add("active");
+firstImage.style.transition = "none";
+firstText.style.transition = "none";
+firstImage.style.transform = `translateY(100%)`;
+firstImage.style.opacity = "0";
+firstText.style.transform = `translateX(-100%)`;
+firstText.style.opacity = "0";
 
-        paragraphs.forEach(p => {
-            p.style.opacity = '0';
-            if (p.classList.contains('paragraph-left')) {
-                p.style.transform = 'translateX(-100px) scale(0.9)';
-            } else if (p.classList.contains('paragraph-right')) {
-                p.style.transform = 'translateX(100px) scale(0.9)';
-            } else {
-                p.style.transform = direction === 'left' ? 'translateX(-100px) scale(0.9)' : 'translateX(100px) scale(0.9)';
-            }
-            p.style.willChange = 'transform, opacity';
-        });
-    });
-});
+setTimeout(() => {
+  animateSectionIn(firstSection, true);
+}, 100);
 
-window.addEventListener('load', applyInitialAnimations);
-window.addEventListener('resize', handleScroll);
+function animateSectionIn(section, isFirst = false, direction = 1) {
+  const image = section.querySelector(".image");
+  const text = section.querySelector(".text");
 
+  // الصور دائمًا تدخل من الأسفل عند التحميل الأول
+  let imageFrom = isFirst ? "100%" : (direction === -1 ? "-100%" : "100%");
+  let textFrom = section.dataset.index % 2 === 0 ? "-100%" : "100%";
 
+  image.style.transition = "none";
+  text.style.transition = "none";
+  image.style.transform = `translateY(${imageFrom})`;
+  image.style.opacity = "0";
+  text.style.transform = `translateX(${textFrom})`;
+  text.style.opacity = "0";
 
-let currentSectionIndex = 0;
-let isScrolling = false;
-const sectionArray = Array.from(sections);
-const counter = document.getElementById('section-counter');
-
-function updateCounter(index) {
-  const formatted = String(index + 1).padStart(2, '0');
-  counter.textContent = formatted;
-}
-
-function scrollToSection(index) {
-  if (index < 0 || index >= sectionArray.length) return;
-  isScrolling = true;
-  sectionArray[index].scrollIntoView({ behavior: 'smooth' });
-  updateCounter(index);
-  currentSectionIndex = index;
   setTimeout(() => {
-    isScrolling = false;
-  }, 900); // يمنع التمرير السريع
+    image.style.transition = "transform 1s, opacity 1s";
+    image.style.transform = "translateY(0)";
+    image.style.opacity = "1";
+
+    text.style.transition = "transform 1s, opacity 1s";
+    text.style.transform = "translateX(0)";
+    text.style.opacity = "1";
+
+    // أنميشن متسلسل للفقرات من الجانب
+    const lines = text.querySelectorAll('.line');
+    lines.forEach((line, i) => {
+      line.style.transition = "none";
+      line.style.opacity = "0";
+      line.style.transform = `translateX(${textFrom})`;
+      setTimeout(() => {
+        line.style.transition = "opacity 0.9s cubic-bezier(0.77,0,0.175,1), transform 0.9s cubic-bezier(0.77,0,0.175,1)";
+        line.style.opacity = "1";
+        line.style.transform = "translateX(0)";
+      }, 100 + i * 150);
+    });
+  }, 10);
 }
 
-// عجلة الماوس
-window.addEventListener('wheel', (e) => {
-  if (isScrolling) return;
-  if (e.deltaY > 50) {
-    scrollToSection(currentSectionIndex + 1);
-  } else if (e.deltaY < -50) {
-    scrollToSection(currentSectionIndex - 1);
+function animateSectionOut(section, direction = 1) {
+  const image = section.querySelector(".image");
+  const text = section.querySelector(".text");
+
+  // الصور تخرج لأعلى عند النزول، وتدخل من أعلى عند الصعود
+  let imageTo = direction === 1 ? "-100%" : "100%";
+  let textTo = section.dataset.index % 2 === 0 ? "-100%" : "100%";
+
+  image.style.transition = "transform 1s, opacity 1s";
+  image.style.transform = `translateY(${imageTo})`;
+  image.style.opacity = "0";
+
+  // لا تلمس text.transition أو text.transform هنا حتى لا تؤثر على الأسطر
+  // أنميشن متسلسل لاختفاء الفقرات
+  const lines = text.querySelectorAll('.line');
+  lines.forEach((line) => {
+    // تأكد أن كل سطر يبدأ من وضعه الطبيعي
+    line.style.transition = "none";
+    line.style.opacity = "1";
+    line.style.transform = "translateX(0)";
+  });
+  lines.forEach((line, i) => {
+    setTimeout(() => {
+      line.style.transition = "opacity 0.7s, transform 0.7s";
+      line.style.opacity = "0";
+      line.style.transform = `translateX(${textTo})`;
+    }, i * 180);
+  });
+}
+
+function goToSection(index) {
+  if (index < 0 || index >= sections.length || isAnimating || index === currentIndex) return;
+  isAnimating = true;
+
+  const currentSection = sections[currentIndex];
+  const nextSection = sections[index];
+  const direction = index > currentIndex ? 1 : -1;
+
+  // مراقبة انتهاء اختفاء جميع الأسطر
+  const text = currentSection.querySelector('.text');
+  const lines = text ? text.querySelectorAll('.line') : [];
+  let finishedCount = 0;
+  function onLineTransitionEnd(e) {
+    // فقط عند انتهاء opacity
+    if (e.propertyName === 'opacity') {
+      finishedCount++;
+      if (finishedCount === lines.length) {
+        lines.forEach(line => line.removeEventListener('transitionend', onLineTransitionEnd));
+        currentSection.classList.remove("active");
+        nextSection.classList.add("active");
+        nextSection.style.opacity = "1";
+        animateSectionIn(nextSection, false, direction);
+        currentIndex = index;
+        isAnimating = false;
+      }
+    }
+  }
+  if (lines.length > 0) {
+    lines.forEach(line => line.addEventListener('transitionend', onLineTransitionEnd));
+    animateSectionOut(currentSection, direction);
+  } else {
+    animateSectionOut(currentSection, direction);
+    setTimeout(() => {
+      currentSection.classList.remove("active");
+      nextSection.classList.add("active");
+      nextSection.style.opacity = "1";
+      animateSectionIn(nextSection, false, direction);
+      currentIndex = index;
+      isAnimating = false;
+    }, 1000);
+  }
+}
+
+let lastWheelTime = 0;
+const wheelDelay = 1200; // مدة منع استقبال wheel بعد كل انتقال (أكبر من مدة الأنميشن)
+
+window.addEventListener("wheel", (e) => {
+  const now = Date.now();
+  if (isAnimating || now - lastWheelTime < wheelDelay) return;
+  lastWheelTime = now;
+  if (e.deltaY > 0) {
+    goToSection(currentIndex + 1);
+  } else {
+    goToSection(currentIndex - 1);
   }
 });
 
-// التاتش (لابتوب أو موبايل)
-let touchStartY = 0;
 
-window.addEventListener('touchstart', (e) => {
-  touchStartY = e.touches[0].clientY;
-});
+function loadNavbar() {
+  fetch('../components/navbar.html') // عدل المسار حسب مكان navbar.html
+    .then(res => res.text())
+    .then(data => {
+      const container = document.getElementById('navbar');
+      container.innerHTML = data;
 
-window.addEventListener('touchend', (e) => {
-  if (isScrolling) return;
-  const touchEndY = e.changedTouches[0].clientY;
-  const delta = touchStartY - touchEndY;
-  if (delta > 50) {
-    scrollToSection(currentSectionIndex + 1);
-  } else if (delta < -50) {
-    scrollToSection(currentSectionIndex - 1);
+      // بعد ما النافبار يدخل، اربط ملفات CSS و JS الخاصة به
+      const navbarCss = document.createElement('link');
+      navbarCss.rel = 'stylesheet';
+      navbarCss.href = '../components/navbar.css'; // عدل المسار حسب مكان ملف CSS
+      document.head.appendChild(navbarCss);
+
+      const navbarScript = document.createElement('script');
+      navbarScript.src = '../components/navbar.js'; // عدل المسار حسب مكان ملف JS
+      navbarScript.onload = function() {
+        // إذا كان هناك دالة تهيئة في navbar.js مثل initNavbar()
+        if (typeof initNavbar === 'function') {
+          initNavbar();
+        }
+      };
+      document.body.appendChild(navbarScript);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', loadNavbar);
+
+// تحديث السنة تلقائيًا
+  const yearSpan = document.getElementById("year");
+  if (yearSpan) {
+    yearSpan.textContent = new Date().getFullYear();
   }
-});
 
-// تحدث العدّاد أثناء التمرير اليدوي (optional backup)
-window.addEventListener('scroll', () => {
-  const viewportMiddle = window.innerHeight / 2;
-  sectionArray.forEach((section, i) => {
-    const rect = section.getBoundingClientRect();
-    if (rect.top <= viewportMiddle && rect.bottom >= viewportMiddle) {
-      currentSectionIndex = i;
-      updateCounter(i);
+// Lightbox functionality من صفحة Runway
+document.addEventListener('DOMContentLoaded', function() {
+  const galleryItems = document.querySelectorAll('.zoom-wrapper');
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const imageCounter = document.getElementById('imageCounter');
+  const closeBtn = document.getElementById('closeLightbox');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const playBtn = document.getElementById('playButton');
+  const playIcon = document.getElementById('playIcon');
+  
+  const svgPlay = `
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" viewBox="0 0 24 24">
+  <path d="M8 5v14l11-7z"/>
+</svg>`;
+
+const svgPause = `
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" viewBox="0 0 24 24">
+  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+</svg>`;
+
+const svgReplay = `
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" viewBox="0 0 24 24">
+  <path d="M12 5V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6a6.005 6.005 0 0 1-5.66-4H4.08a8.003 8.003 0 0 0 7.92 6c4.42 0 8-3.58 8-8s-3.58-8-8-8z"/>
+</svg>`;
+
+  let currentIndex = 0;
+  let intervalId = null;
+  let isPlaying = false;
+
+  const showImage = (index) => {
+    const total = galleryItems.length;
+    if (index < 0 || index >= total) return;
+
+    const imgSrc = galleryItems[index].querySelector('img').src;
+    lightboxImg.src = imgSrc;
+    currentIndex = index;
+    imageCounter.textContent = `${index + 1} / ${total}`;
+
+    prevBtn.style.display = index === 0 ? 'none' : 'block';
+    nextBtn.style.display = index === total - 1 ? 'none' : 'block';
+  };
+
+  // ربط الضغط على الصور والزر
+  galleryItems.forEach((wrapper, index) => {
+    wrapper.addEventListener('click', () => {
+      lightbox.classList.add('show');
+      showImage(index);
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  // ربط الضغط على أزرار lookbook
+  document.querySelectorAll('.lookbook-trigger').forEach((trigger, index) => {
+    trigger.addEventListener('click', () => {
+      lightbox.classList.add('show');
+      showImage(0); // يبدأ من أول صورة
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  closeBtn.addEventListener('click', () => {
+    lightbox.classList.remove('show');
+    stopSlideshow();
+    document.body.style.overflow = '';
+  });
+
+  prevBtn.addEventListener('click', () => {
+    showImage(currentIndex - 1);
+  });
+
+  nextBtn.addEventListener('click', () => {
+    showImage(currentIndex + 1);
+  });
+
+  playBtn.addEventListener('click', () => {
+    if (playIcon.innerHTML.includes('Replay') || playIcon.innerHTML.includes('path d=\"M12 5V1')) {
+      currentIndex = 0;
+      showImage(currentIndex);
+      startSlideshow();
+    } else if (isPlaying) {
+      stopSlideshow();
+    } else {
+      startSlideshow();
+    }
+  });
+
+  const startSlideshow = () => {
+    isPlaying = true;
+    playIcon.innerHTML = svgPause;
+    intervalId = setInterval(() => {
+      if (currentIndex < galleryItems.length - 1) {
+        showImage(currentIndex + 1);
+      } else {
+        stopSlideshow();
+        playIcon.innerHTML = svgReplay;
+      }
+    }, 2000);
+  };
+
+  const stopSlideshow = () => {
+    isPlaying = false;
+    playIcon.innerHTML = svgPlay;
+    clearInterval(intervalId);
+  };
+
+  // التحكم بالكيبورد - إزالة Escape
+  document.addEventListener('keydown', function(e) {
+    if (lightbox.classList.contains('show')) {
+      if (e.key === 'ArrowRight') showImage(currentIndex + 1);
+      if (e.key === 'ArrowLeft') showImage(currentIndex - 1);
     }
   });
 });
