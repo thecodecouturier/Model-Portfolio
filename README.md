@@ -1,9 +1,12 @@
-Name of the project: Model Portfolio Platform
+**Name of the project:** Model Portfolio Platform
 
-Description of the project and the role of the participant: A multi-page digital portfolio platform designed to showcase creative works in the fashion industry. The project features an interactive frontend with animations, a custom navigation bar, multi-language support, portfolio galleries with lightbox functionality, and contact pages, all built with HTML, CSS, and Vanilla JavaScript. The backend dashboard for content management is planned for future development.
-I started developing this website out of my passion for fashion elegance, and modeling, alongside my studies. Every section of the interface is crafted with care, with every detail selected to reflect my artistic taste and style
+**Description of the project and the role of the participant:** A multi-page digital portfolio platform designed to showcase creative works in the fashion industry. The project features an interactive frontend with animations, a custom navigation bar, multi-language support, portfolio galleries with lightbox functionality, and contact pages, all built with HTML, CSS, and Vanilla JavaScript. The backend dashboard for content management is planned for future development.
 
-Link to the project's website: https://capable-sable-e69d10.netlify.app/
+I started developing this website out of my passion for fashion elegance, and modeling, alongside my studies. Every section of the interface is crafted with care, with every detail selected to reflect my artistic taste and style.
+
+**Link to the project's website:** https://capable-sable-e69d10.netlify.app/
+
+---
 
 # Model Portfolio Platform - Professional Creative Portfolio
 
